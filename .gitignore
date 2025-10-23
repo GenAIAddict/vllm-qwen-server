@@ -1,0 +1,171 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+*.egg-info/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+hypothesis/
+.pytest_cache/
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer / local virtualenvs
+env/
+venv/
+.venv/
+.venv_gptoss/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+Icon
+ehthumbs.db
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Temporary files
+*.swp
+*~
+.*.swp
+.~lock.*
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Uploaded files (do not commit user uploads)
+/uploads/
+
+# Large model and ML artifacts
+# common model weight and checkpoint extensions
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.h5
+*.model
+*.onnx
+
+# Model cache and staging directories
+models/
+checkpoints/
+weights/
+cache/
+.cache/
+hf_cache/
+transformers_cache/
+
+# Torch and CUDA build artifacts
+*.cu
+*.class
+
+# Poetry
+poetry.lock
+
+# Environment variables
+.env
+.env.*
+
+# Lockfiles (optional to ignore)
+pipfile.lock
+
+# Shell history
+.bash_history
+
+# System temp
+/tmp/
+
+# Ignore coverage and test output folders
+/htmlcov/
+
+# Ignore compiled C/C++ artifacts
+*.o
+*.a
+*.so
+
+# Ignore generated documentation
+/docs/_build/
+
+# Ignore local scripts and generated runtime files
+run.sh
+start_server.sh
+
+# keep gitignore itself
+!.gitignore

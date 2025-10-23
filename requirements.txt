@@ -1,0 +1,8 @@
+vllm
+qwen-vl-utils==0.0.14
+#flask
+#requests
+#Pillow
+#pyPDF2
+#werkzeug
+#pdf2image
