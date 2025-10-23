@@ -23,6 +23,13 @@ A complete setup for hosting the Qwen3-VL-8B-Thinking model using vLLM with a be
 
 ## 🚀 Quick Start Guide
 
+### Step 0: Clone the Repository
+```bash
+# Clone the project from GitHub
+git clone https://github.com/GenAIAddict/vllm-qwen-server.git
+cd vllm-qwen-server
+```
+
 ### Step 1: Setup Environment
 ```bash
 # Make scripts executable
