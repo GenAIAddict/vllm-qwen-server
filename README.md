@@ -1,25 +1,56 @@
-# Qwen3-VL-8B-Thinking vLLM Server
+# vLLM Qwen Server
 
-A complete setup for hosting the Qwen3-VL-8B-Thinking model using vLLM with a beautiful web interface.
+A complete setup for hosting Qwen vision-language models using vLLM with high-performance GPU serving capabilities.
 
 ## 🎯 What This Project Provides
 
-- **vLLM Server** - High-performance AI model serving
-- **Web Chat Interface** - Beautiful, user-friendly chat UI
-- **API Testing Tools** - Scripts to test your model
-- **Complete Setup** - Everything configured and ready to run
+- **Qwen3-VL-8B-Instruct Server** - Multi-model serving with vLLM on primary GPU
+- **GPT-OSS-20B Alternative** - Quantized model option on secondary GPU
+- **Dual Virtual Environments** - Separate isolated environments for each model
+- **Environment Management** - Flexible GPU allocation and performance configuration
+- **Production Ready Scripts** - Comprehensive startup, shutdown, and wrapper scripts
 
 ## 🖥️ System Requirements
 
-**IMPORTANT:** The Qwen3-VL-8B-Thinking model requires significant GPU memory:
+### GPU Requirements
+
+**For Qwen3-VL-8B-Instruct:**
 - **Model weights:** ~16.6 GB
 - **KV cache:** Additional memory needed
 - **Total GPU memory needed:** ~24 GB minimum
 
+**For GPT-OSS-20B-GGUF (Quantized):**
+- **Model weights:** ~10-12 GB (quantized)
+- **Total GPU memory needed:** ~12-16 GB
+
 **Recommended Hardware:**
-- RTX 3090 (24GB) ✅
-- RTX 4090 (24GB) ✅
-- A100 (40GB/80GB) ✅
+- RTX 3090 (24GB) - Single model ✅
+- RTX 4090 (24GB) - Single model ✅
+- A100 (40GB) - Both models simultaneously ✅
+- A100 (80GB) - Both models with headroom ✅
+- Multi-GPU setup - One GPU per model recommended
+
+### Software Requirements
+- CUDA 11.8+
+- Python 3.10+
+- vLLM latest version
+- PyTorch with CUDA support
+
+## 📁 Project Structure
+
+```
+vllm-qwen-server/
+├── setup.sh                    # Setup primary environment for Qwen3-VL
+├── setup_gptoss.sh            # Setup secondary environment for GPT-OSS
+├── start_server.sh            # Start Qwen3-VL server
+├── start_gptoss.sh            # Start GPT-OSS server
+├── start_server_wrapper.sh    # Wrapper with CUDA environment setup
+├── stop_server.sh             # Graceful server shutdown utility
+├── requirements.txt           # Python dependencies
+├── uploads/                   # Directory for file uploads
+└── .venv/                     # Primary virtual environment (auto-created)
+    .venv_gptoss/             # Secondary virtual environment (auto-created)
+```
 
 ## 🚀 Quick Start Guide
 
@@ -30,29 +61,89 @@ git clone https://github.com/GenAIAddict/vllm-qwen-server.git
 cd vllm-qwen-server
 ```
 
-### Step 1: Setup Environment
+### Step 1: Setup Environment(s)
+
+#### For Qwen3-VL-8B-Instruct (Primary):
 ```bash
-# Make scripts executable
+# Make setup script executable
 chmod +x setup.sh
 
-# Install dependencies (run once)
+# Install dependencies and create virtual environment
 ./setup.sh
 ```
 
-### Step 2: Start the AI Model Server
+#### For GPT-OSS-20B (Optional, requires second GPU):
 ```bash
-# Make server script executable
-chmod +x start_server.sh
+# Make setup script executable
+chmod +x setup_gptoss.sh
 
-# Start vLLM server (keep this running)
+# Install dependencies and create separate virtual environment
+./setup_gptoss.sh
+```
+
+### Step 2: Start the Server(s)
+
+#### Start Qwen3-VL-8B-Instruct Server
+```bash
+# Make server scripts executable
+chmod +x start_server.sh start_server_wrapper.sh
+
+# Option 1: Direct start
 ./start_server.sh
+
+# Option 2: Start with wrapper (recommended for proper CUDA setup)
+./start_server_wrapper.sh
 ```
 **✅ Server will be running at:** `http://localhost:8000`
 
-### Step 3: Test the Model (Optional)
+**Configuration options (set before running):**
 ```bash
-# Test the model API
-python test_model.py
+# Custom model (default: Qwen/Qwen3-VL-8B-Instruct)
+export MODEL_ARG="Qwen/Qwen3-VL-8B-Instruct"
+
+# Custom served model name (default: Qwen3-VL-8B-Instruct)
+export SERVED_NAME="Qwen3-VL-8B-Instruct"
+
+# Context length (default: 4096)
+export CONTEXT_LENGTH=4096
+
+# GPU memory utilization (default: 0.98, range: 0.0-1.0)
+export GPU_MEM_UTIL=0.98
+
+# Max concurrent sequences (default: 1)
+export MAX_NUM_SEQS=1
+
+# Server port (default: 8000)
+export PORT=8000
+
+# GPU to use (default: 1)
+export CUDA_VISIBLE_DEVICES=0
+```
+
+#### Start GPT-OSS-20B Server (Optional)
+```bash
+chmod +x start_gptoss.sh
+./start_gptoss.sh
+```
+**✅ Server will be running at:** `http://localhost:8001`
+
+### Step 3: Stop the Server(s)
+
+Use the comprehensive stop script:
+```bash
+chmod +x stop_server.sh
+
+# Stop by port (default port 8000)
+./stop_server.sh --port 8000
+
+# Stop by served model name
+./stop_server.sh --model Qwen3-VL-8B-Instruct
+
+# Stop by PID
+./stop_server.sh --pid 12345
+
+# Force kill immediately
+./stop_server.sh --port 8000 --force
 ```
 
 ### Step 4: Start Web Interface
@@ -62,57 +153,68 @@ python web_ui.py
 ```
 **✅ Web UI will be available at:** `http://localhost:5000`
 
-## 📋 Complete Running Sequence
+## � Advanced Configuration
 
-1. **Terminal 1 - Start AI Server:**
-   ```bash
-   cd /path/to/your/project
-   source .venv/bin/activate
-   ./start_server.sh
-   ```
-   *(Keep this running - this is your AI model)*
+### Environment Variables Reference
 
-2. **Terminal 2 - Start Web UI:**
-   ```bash
-   cd /path/to/your/project
-   source .venv/bin/activate
-   python web_ui.py
-   ```
-   *(Keep this running - this is your web interface)*
-
-3. **Open Browser:**
-   - Go to: `http://localhost:5000`
-   - Start chatting with your AI model!
-
-## 🎮 Usage Options
-
-### Option 1: Web Interface (Recommended)
-- **URL:** `http://localhost:5000`
-- Beautiful chat interface with file upload support
-- **Upload images** (PNG, JPG, GIF, etc.) for visual analysis
-- **Upload PDF documents** for text extraction and analysis
-- Drag & drop file uploading
-- Adjustable settings (temperature, max tokens, thinking budget)
-- Shows model's "thinking" process
-- Mobile-friendly design
-
-### Option 2: Direct API Calls
+**Qwen3-VL Server (.venv):**
 ```bash
+MODEL_ARG              # Model identifier (default: Qwen/Qwen3-VL-8B-Instruct)
+SERVED_NAME           # Name exposed by API (default: Qwen3-VL-8B-Instruct)
+CONTEXT_LENGTH        # Max token context (default: 4096)
+GPU_MEM_UTIL          # GPU memory percentage (default: 0.98)
+MAX_NUM_SEQS          # Concurrent requests (default: 1)
+PORT                  # Server port (default: 8000)
+CUDA_VISIBLE_DEVICES  # GPU device number (default: 1)
+```
+
+**GPT-OSS Server (.venv_gptoss):**
+```bash
+MODEL                 # Model identifier (default: unsloth/gpt-oss-20b-GGUF)
+PORT                  # Server port (default: 8001)
+CUDA_VISIBLE_DEVICES  # GPU device number (default: 1)
+```
+
+### Using Different GPUs
+
+Start on GPU 0:
+```bash
+export CUDA_VISIBLE_DEVICES=0
+./start_server.sh
+```
+
+Start on GPU 1 (default):
+```bash
+export CUDA_VISIBLE_DEVICES=1
+./start_server.sh
+```
+
+Use multiple GPUs:
+```bash
+export CUDA_VISIBLE_DEVICES=0,1
+./start_server.sh
+```
+
+## 🎮 API Usage Examples
+
+### Option 1: Using cURL
+```bash
+# Chat completion
 curl -X POST http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "Qwen3-VL-8B-Thinking",
+    "model": "Qwen3-VL-8B-Instruct",
     "messages": [{"role": "user", "content": "Hello!"}],
     "max_tokens": 500
   }'
 ```
 
-### Option 3: Python API
+### Option 2: Using Python Requests
 ```python
 import requests
 
 response = requests.post("http://localhost:8000/v1/chat/completions", json={
-    "model": "Qwen3-VL-8B-Thinking",
+    "model": "Qwen3-VL-8B-Instruct",
     "messages": [{"role": "user", "content": "Your question here"}],
     "max_tokens": 500
 })
@@ -120,56 +222,98 @@ response = requests.post("http://localhost:8000/v1/chat/completions", json={
 print(response.json()['choices'][0]['message']['content'])
 ```
 
-## 📁 Project Structure
+### Option 3: Using OpenAI Python SDK
+```python
+from openai import OpenAI
 
+client = OpenAI(api_key="dummy", base_url="http://localhost:8000/v1")
+
+response = client.chat.completions.create(
+    model="Qwen3-VL-8B-Instruct",
+    messages=[{"role": "user", "content": "Your question"}],
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
 ```
-├── setup.sh              # Environment setup script
-├── start_server.sh        # vLLM server startup script
-├── web_ui.py             # Web interface server
-├── test_model.py         # API testing script
-├── requirements.txt      # Python dependencies
-├── templates/
-│   └── chat.html         # Web UI template
-└── README.md            # This file
-```
-
-## 🔧 Model Configuration
-
-- **Model:** Qwen/Qwen3-VL-8B-Thinking
-- **Model Size:** ~16.6 GB
-- **Context Length:** 7,360 tokens (optimized for 24GB GPU)
-- **Server Port:** 8000
-- **Web UI Port:** 5000
-- **GPU Memory Utilization:** 98%
 
 ## 🛠️ Troubleshooting
 
-### "No available memory for cache blocks" Error
+### "CUDA out of memory" Error
 1. **Check GPU memory:** `nvidia-smi`
-2. **Ensure using correct GPU:** Check `CUDA_VISIBLE_DEVICES=1` in `start_server.sh`
-3. **Reduce context length:** Lower `CONTEXT_LENGTH` in `start_server.sh`
-4. **Lower GPU utilization:** Reduce `--gpu-memory-utilization` value
+2. **Verify GPU selection:** Ensure `CUDA_VISIBLE_DEVICES` is correct
+3. **Reduce memory utilization:** Lower `GPU_MEM_UTIL` (e.g., 0.9 instead of 0.98)
+4. **Reduce context length:** Lower `CONTEXT_LENGTH` (e.g., 2048 instead of 4096)
+5. **Reduce concurrent requests:** Lower `MAX_NUM_SEQS`
 
-### Web UI Not Loading
-1. **Check vLLM server:** Ensure `./start_server.sh` is running
-2. **Check ports:** Make sure ports 5000 and 8000 are available
-3. **Check browser:** Go to `http://localhost:5000` (not 127.0.0.1)
+### Server Won't Start
+1. **Check CUDA availability:** `python -c "import torch; print(torch.cuda.is_available())"`
+2. **Verify virtual environment:** `source .venv/bin/activate`
+3. **Check dependencies:** `pip list | grep vllm`
+4. **Check port availability:** `lsof -i :8000` or `netstat -tuln | grep 8000`
+
+### Port Already in Use
+```bash
+# Find process using port 8000
+lsof -i :8000
+
+# Kill the process
+kill -9 <PID>
+
+# Or use the stop script
+./stop_server.sh --port 8000
+```
 
 ### Model Loading Slowly
-- **First run:** Model downloads ~17GB (takes time)
-- **Subsequent runs:** Much faster (model cached locally)
+- **First run:** Model downloads from Hugging Face (takes time)
+- **Subsequent runs:** Model cached locally (much faster)
+- **Cache location:** `~/.cache/huggingface/hub/`
 
-## 🎯 Features
+## 📊 Performance Tips
 
-### vLLM Server Features:
-- ✅ High-performance inference
-- ✅ OpenAI-compatible API
-- ✅ Optimized for RTX 3090
-- ✅ Automatic GPU detection
-- ✅ Memory optimization
+1. **Enable Flash Attention:** Already configured in setup
+2. **Use GPU memory utilization near 1.0:** Better throughput
+3. **Batch requests:** Use `MAX_NUM_SEQS > 1` if handling multiple requests
+4. **Monitor GPU:** Run `nvidia-smi -l 1` in separate terminal
 
-### Web UI Features:
-- ✅ Beautiful, modern interface
+## � Firewall & Network Access
+
+### Local Only (Default)
+```bash
+# Access from localhost only
+http://localhost:8000
+```
+
+### Network Access
+Edit `start_server.sh` to change:
+```bash
+--host 0.0.0.0    # Currently set to accept all interfaces
+```
+
+### Behind Proxy/Nginx
+Configure your reverse proxy to forward requests to `http://localhost:8000`
+
+## 📝 Model Information
+
+### Qwen3-VL-8B-Instruct
+- **Publisher:** Alibaba Cloud
+- **Model Size:** ~16.6 GB
+- **Parameters:** 8 Billion
+- **Capabilities:** Vision, Language, Instruction-following
+- **License:** Check [Qwen License](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct)
+
+### GPT-OSS-20B-GGUF
+- **Model Size:** ~10-12 GB (quantized)
+- **Parameters:** 20 Billion
+- **Format:** GGUF (quantized)
+- **Purpose:** Alternative lightweight option
+
+## 📚 Resources
+
+- [vLLM Documentation](https://docs.vllm.ai/)
+- [Qwen Models](https://huggingface.co/Qwen)
+- [OpenAI API Reference](https://platform.openai.com/docs/api-reference)
+- [CUDA Setup Guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/)
 - ✅ Real-time status monitoring
 - ✅ Adjustable AI parameters (temperature, max tokens)
 - ✅ **Thinking Budget Control** - Adjust how much the AI "thinks"
