@@ -164,8 +164,8 @@ pipfile.lock
 /docs/_build/
 
 # Ignore local scripts and generated runtime files
-run.sh
-start_server.sh
+# run.sh
+# start_server.sh
 
 # keep gitignore itself
 !.gitignore
