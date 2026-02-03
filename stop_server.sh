@@ -62,7 +62,17 @@ fi
 
 if [[ -z "$PID" ]]; then
   echo "No process found matching the given criteria" >&2
-  exit 1
+  # Try one last time to find any vLLM related processes if no PID found
+  PID=$(pgrep -f "vllm|EngineCore" || true)
+  if [[ -z "$PID" ]]; then
+    exit 1
+  fi
+fi
+
+# Also find any associated EngineCore processes
+CORE_PIDS=$(pgrep -f "VLLM::EngineCore" || true)
+if [[ -n "$CORE_PIDS" ]]; then
+  PID="$PID $CORE_PIDS"
 fi
 
 echo "Found PID=$PID"

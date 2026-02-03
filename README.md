@@ -6,7 +6,7 @@ A complete setup for hosting Qwen vision-language models using vLLM with high-pe
 
 - **Qwen3-VL-8B-Instruct Server** - Multi-model serving with vLLM on primary GPU
 - **GPT-OSS-20B Alternative** - Quantized model option on secondary GPU
-- **Dual Virtual Environments** - Separate isolated environments for each model
+- **Dual Conda Environments** - Separate isolated environments for each model
 - **Environment Management** - Flexible GPU allocation and performance configuration
 - **Production Ready Scripts** - Comprehensive startup, shutdown, and wrapper scripts
 
@@ -48,8 +48,8 @@ vllm-qwen-server/
 ├── stop_server.sh             # Graceful server shutdown utility
 ├── requirements.txt           # Python dependencies
 ├── uploads/                   # Directory for file uploads
-└── .venv/                     # Primary virtual environment (auto-created)
-    .venv_gptoss/             # Secondary virtual environment (auto-created)
+├── Qwen-Env/                 # Primary conda environment (auto-created)
+└── vllm-gptoss-env/          # Secondary conda environment (auto-created)
 ```
 
 ## 🚀 Quick Start Guide
@@ -68,17 +68,19 @@ cd vllm-qwen-server
 # Make setup script executable
 chmod +x setup.sh
 
-# Install dependencies and create virtual environment
+# Install dependencies and create conda environment
+# Install dependencies and create conda environment
 ./setup.sh
 ```
 
 #### For GPT-OSS-20B (Optional, requires second GPU):
 ```bash
-# Make setup script executable
-chmod +x setup_gptoss.sh
+# Create conda environment for GPT-OSS
+conda create -n vllm-gptoss-env python=3.10 -y
+conda activate vllm-gptoss-env
 
-# Install dependencies and create separate virtual environment
-./setup_gptoss.sh
+# Install dependencies
+pip install vllm transformers
 ```
 
 ### Step 2: Start the Server(s)
@@ -157,7 +159,7 @@ python web_ui.py
 
 ### Environment Variables Reference
 
-**Qwen3-VL Server (.venv):**
+**Qwen3-VL Server (Qwen-Env):**
 ```bash
 MODEL_ARG              # Model identifier (default: Qwen/Qwen3-VL-8B-Instruct)
 SERVED_NAME           # Name exposed by API (default: Qwen3-VL-8B-Instruct)
@@ -168,7 +170,7 @@ PORT                  # Server port (default: 8000)
 CUDA_VISIBLE_DEVICES  # GPU device number (default: 1)
 ```
 
-**GPT-OSS Server (.venv_gptoss):**
+**GPT-OSS Server (vllm-gptoss-env):**
 ```bash
 MODEL                 # Model identifier (default: unsloth/gpt-oss-20b-GGUF)
 PORT                  # Server port (default: 8001)
@@ -248,7 +250,7 @@ print(response.choices[0].message.content)
 
 ### Server Won't Start
 1. **Check CUDA availability:** `python -c "import torch; print(torch.cuda.is_available())"`
-2. **Verify virtual environment:** `source .venv/bin/activate`
+2. **Verify conda environment:** `conda activate Qwen-Env`
 3. **Check dependencies:** `pip list | grep vllm`
 4. **Check port availability:** `lsof -i :8000` or `netstat -tuln | grep 8000`
 
